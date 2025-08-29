@@ -1,0 +1,26 @@
+app:
+  name: KafkaToKafkaJob
+  parallelism: 3
+
+kafka:
+  bootstrapServers: "broker1:29092,broker2:39092,broker3:49092"
+  groupId: "flink-consumer-k2k"
+  inputTopics: ["profiles.raw"]     # 여러 개 가능
+  outputTopic: "profiles.cleaned"
+  exactlyOnce: true                 # true => TRANSACTIONAL SINK
+
+checkpoint:
+  intervalMs: 10000                 # 10s
+  timeoutMs: 600000                 # 10m
+  minPauseMs: 0
+  path: "file:///tmp/flink-chk"     # 로컬 테스트용. 운영은 HDFS/S3 권장
+  externalized: "RETAIN_ON_CANCELLATION"
+
+watermark:
+  outOfOrderMaxLatenessMs: 5000     # 5s
+
+serialization:
+  keyDeserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+  valueDeserializer: "org.apache.kafka.common.serialization.StringDeserializer"
+  keySerializer: "org.apache.kafka.common.serialization.StringSerializer"
+  valueSerializer: "org.apache.kafka.common.serialization.StringSerializer"

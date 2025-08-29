@@ -1,0 +1,14 @@
+# === Metrics / Prometheus ===
+metrics.reporters: prom
+metrics.reporter.prom.factory: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+metrics.reporter.prom.port: 9250-9260      # 다중 TM 대비 범위 열기
+
+# === Pipeline Latency ===
+pipeline.latency-tracking-interval: 5 s
+
+# === (선택) REST 포트 (로컬 단일 JVM 실행 시 무시됨)
+rest.port: 8081
+
+# === State / Checkpoint 기본값 (코드에서 덮어써도 됨)
+execution.checkpointing.interval: 10 s
+execution.checkpointing.timeout: 10 min

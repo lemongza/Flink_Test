@@ -80,6 +80,13 @@ dependencies {
     // 애플리케이션에 포함해야 하는 것들 (Shadow JAR)
     compileOnly "org.apache.flink:flink-connector-kafka:${flinkConnectorKafkaVersion}"
     flinkShadowJar "com.fasterxml.jackson.core:jackson-databind:2.17.2"
+
+    // Prometheus 리포터
+    runtimeOnly "org.apache.flink:flink-metrics-prometheus:${flinkVersion}"
+
+    // YAML 파싱 (스프링 안 쓸 때)
+    implementation 'org.yaml:snakeyaml:2.2'
+
 }
 
 
