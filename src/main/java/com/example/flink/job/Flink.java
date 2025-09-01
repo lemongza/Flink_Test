@@ -148,9 +148,14 @@ public class Flink {
                 .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 // 필요 시 SASL 설정 해제 주석 풀기
-                // .setProperty("security.protocol", "SASL_PLAINTEXT")
-                // .setProperty("sasl.mechanism", "SCRAM-SHA-512")
-                // .setProperty("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"admin\" password=\"admin-secret\";")
+                 .setProperty("security.protocol", "SASL_PLAINTEXT")
+                .setProperty("sasl.mechanism", "OAUTHBEARER")
+                .setProperty("sasl.login.callback.handler.class",
+                        "io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler")
+                .setProperty("sasl.jaas.config",
+                        "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required "
+                                + "username=\"admin\" password=\"admin-secret\" "
+                                + "metadataServerUrls=\"http://15.164.187.115:8090\";")
                 .build();
 
         DataStream<String> jsonStream =
@@ -219,9 +224,14 @@ public class Flink {
         String sinkTopic = "audit-log-flink";
         Properties producerProps = new Properties();
         // 필요 시 보안 설정
-        // producerProps.put("security.protocol", "SASL_PLAINTEXT");
-        // producerProps.put("sasl.mechanism", "SCRAM-SHA-512");
-        // producerProps.put("sasl.jaas.config", "org.apache.kafka.common.security.scram.ScramLoginModule required username=\"admin\" password=\"admin-secret\";");
+        producerProps.put("security.protocol", "SASL_PLAINTEXT");
+        producerProps.put("sasl.mechanism", "OAUTHBEARER");
+        producerProps.put("sasl.login.callback.handler.class",
+                "io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler");
+        producerProps.put("sasl.jaas.config",
+                "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required "
+                        + "username=\"admin\" password=\"admin-secret\" "
+                        + "metadataServerUrls=\"http://15.164.187.115:8090\";");
 
         KafkaSink<ParsedLog> sink = KafkaSink.<ParsedLog>builder()
                 .setBootstrapServers(bootstrapServers)
