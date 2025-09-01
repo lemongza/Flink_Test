@@ -33,34 +33,18 @@ applicationDefaultJvmArgs = ["-Dlog4j.configurationFile=log4j2.properties"]
 
 repositories {
     mavenCentral()
+    maven { url "https://packages.confluent.io/maven/" }   // ⬅️ 추가
     maven {
         url "https://repository.apache.org/content/repositories/snapshots"
-        mavenContent {
-            snapshotsOnly()
-        }
+        mavenContent { snapshotsOnly() }
     }
 }
 
 configurations {
-    // 이 구성에 들어간 것만 Shadow JAR에 포함
+    // Only artifacts in this configuration will be bundled into the Shadow JAR
     flinkShadowJar
-
-    // 클러스터가 제공하는 것들은 제외
-    flinkShadowJar.exclude group: 'org.apache.flink', module: 'force-shading'
-    flinkShadowJar.exclude group: 'com.google.code.findbugs', module: 'jsr305'
-    flinkShadowJar.exclude group: 'org.slf4j'
-    flinkShadowJar.exclude group: 'org.apache.logging.log4j'
-
-    // 배포를 위해 서버에서 제공하는 모든 핵심 Flink 종속성을 제외.
-    flinkShadowJar.exclude group: 'org.apache.flink', module: 'flink-streaming-java'
-    flinkShadowJar.exclude group: 'org.apache.flink', module: 'flink-clients'
-    flinkShadowJar.exclude group: 'org.apache.flink', module: 'flink-table-api-java'
-    flinkShadowJar.exclude group: 'org.apache.flink', module: 'flink-table-api-java-bridge'
-    flinkShadowJar.exclude group: 'org.apache.flink', module: 'flink-parent'
-    flinkShadowJar.exclude group: 'org.apache.flink', module: 'flink-table-runtime'
-    flinkShadowJar.exclude group: 'org.apache.flink', module: 'flink-table-planner-loader'
-
 }
+
 
 dependencies {
     // 클러스터 제공
@@ -78,9 +62,11 @@ dependencies {
     compileOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
 
     // 애플리케이션에 포함해야 하는 것들 (Shadow JAR)
-    compileOnly "org.apache.flink:flink-connector-kafka:${flinkConnectorKafkaVersion}"
+    flinkShadowJar "org.apache.flink:flink-connector-kafka:${flinkConnectorKafkaVersion}"
     flinkShadowJar "com.fasterxml.jackson.core:jackson-databind:2.17.2"
-
+//    flinkShadowJar "org.apache.kafka:kafka-clients:${kafkaClientVersion}"
+    flinkShadowJar "io.confluent:kafka-oauth-client:7.4.0"
+    flinkShadowJar "io.confluent:kafka-client-plugins:7.4.0"
     // Prometheus 리포터
     runtimeOnly "org.apache.flink:flink-metrics-prometheus:${flinkVersion}"
 

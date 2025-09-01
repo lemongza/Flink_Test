@@ -59,7 +59,7 @@ public class Flink {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class AuthorizationInfo implements Serializable {
-        public boolean granted;
+        public Boolean granted;
         public String operation;            // e.g. DescribeConfigs
         public String resourceType;         // e.g. Topic
         public String resourceName;         // e.g. profiles.raw
@@ -88,7 +88,7 @@ public class Flink {
 
     // ===== Sink에 보낼 평탄화된 레코드 =====
     public static class ParsedLog implements Serializable {
-        public boolean granted;
+        public Boolean granted;
         public String eventTimeUtc;         // 원본 time(UTC)
         public String eventTimeSeoul;       // Asia/Seoul로 변환
         public String principal;
@@ -150,8 +150,8 @@ public class Flink {
                 // 필요 시 SASL 설정 해제 주석 풀기
                  .setProperty("security.protocol", "SASL_PLAINTEXT")
                 .setProperty("sasl.mechanism", "OAUTHBEARER")
-                .setProperty("sasl.login.callback.handler.class",
-                        "io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler")
+//                .setProperty("sasl.login.callback.handler.class",
+//                        "io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler")
                 .setProperty("sasl.jaas.config",
                         "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required "
                                 + "username=\"admin\" password=\"admin-secret\" "
@@ -175,9 +175,7 @@ public class Flink {
                     }
                 })
                 .name("ParseJson")
-                .filter(Objects::nonNull)
-                // 미승인(granted == false)만 통과
-                .filter(ev -> ev.data != null && ev.data.authorizationInfo != null && !ev.data.authorizationInfo.granted)
+                .filter(ev -> ev.data != null && ev.data.authorizationInfo != null && Boolean.FALSE.equals(ev.data.authorizationInfo.granted))
                 .name("Filter_Unauthorized")
                 // CloudEvent → ParsedLog 평탄화 + 시간대 변환
                 .map((MapFunction<CloudEvent, ParsedLog>) ev -> {
@@ -226,8 +224,8 @@ public class Flink {
         // 필요 시 보안 설정
         producerProps.put("security.protocol", "SASL_PLAINTEXT");
         producerProps.put("sasl.mechanism", "OAUTHBEARER");
-        producerProps.put("sasl.login.callback.handler.class",
-                "io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler");
+//        producerProps.put("sasl.login.callback.handler.class",
+//                "io.confluent.kafka.clients.plugins.auth.token.TokenUserLoginCallbackHandler");
         producerProps.put("sasl.jaas.config",
                 "org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required "
                         + "username=\"admin\" password=\"admin-secret\" "
